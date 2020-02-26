@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using UsersMgmt.Domain.Entities;
+@using UsersMgmt.App.Security;
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+
+@if (SignInManager.IsSignedIn(User))
+{
+    @if (User.IsInRole(SecurityConstants.AdminRoleString))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Users</a>
+        </li>
+    }
+}

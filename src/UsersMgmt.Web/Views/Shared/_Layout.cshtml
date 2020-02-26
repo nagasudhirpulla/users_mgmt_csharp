@@ -25,6 +25,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <partial name="_AuthorizedPartial" />
                     </ul>
                 </div>
             </div>
@@ -32,6 +33,7 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            <partial name="_StatusBaloonPartial" model=@TempData["StatusBaloon"] />
             @RenderBody()
         </main>
     </div>

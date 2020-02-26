@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using UsersMgmt.Infra;
 using UsersMgmt.App.Security;
 using UsersMgmt.Domain.Entities;
+using UsersMgmt.App;
 
 namespace UsersMgmt.Web
 {
@@ -29,6 +30,7 @@ namespace UsersMgmt.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddInfrastructure(Configuration, Environment);
+            services.AddApplication();
             services
                 .AddControllersWithViews()
                 .AddRazorRuntimeCompilation();

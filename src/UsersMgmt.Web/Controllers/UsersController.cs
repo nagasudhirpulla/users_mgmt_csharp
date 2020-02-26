@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using UsersMgmt.App.Security;
+using UsersMgmt.App.Security.Commands.CreateAppUser;
+using UsersMgmt.App.Security.Queries.GetAppUsers;
 using UsersMgmt.Domain.Entities;
 using UsersMgmt.Web.Extensions;
 using UsersMgmt.Web.Models;
@@ -20,46 +23,17 @@ namespace UsersMgmt.Web.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger _logger;
-        private readonly IdentityInit _identityInit;
-        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IdentityInit identityInit)
+        private readonly IMediator _mediator;
+        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IMediator mediator)
         {
-            // acquire user manager via dependency injection
             _userManager = userManager;
             _logger = logger;
-            _identityInit = identityInit;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index()
         {
-            UserListVM vm = new UserListVM();
-            vm.Users = new List<UserListItemVM>();
-            // get the list of users
-            List<ApplicationUser> users = await _userManager.Users.ToListAsync();
-            foreach (ApplicationUser user in users)
-            {
-                // get user is of admin role
-                //bool isSuperAdmin = (await _userManager.GetRolesAsync(user)).Any(r => r == SecurityConstants.AdminRoleString);
-                // todo make identity init  singleton service like email config so as to avoid raw strings usage
-                bool isSuperAdmin = (user.UserName == _identityInit.AdminUserName);
-                if (!isSuperAdmin)
-                {
-                    // add user to vm only if not admin
-                    string userRole = "";
-                    IList<string> existingRoles = await _userManager.GetRolesAsync(user);
-                    if (existingRoles.Count > 0)
-                    {
-                        userRole = existingRoles.ElementAt(0);
-                    }
-                    vm.Users.Add(new UserListItemVM
-                    {
-                        UserId = user.Id,
-                        Username = user.UserName,
-                        Email = user.Email,
-                        UserRole = userRole
-                    });
-                }
-
-            }
+            var vm = await _mediator.Send(new GetAppUsersListQuery());
             return View(vm);
         }
 
@@ -72,28 +46,16 @@ namespace UsersMgmt.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(UserCreateVM vm)
+        public async Task<IActionResult> Create(CreateAppUserCommand vm)
         {
-            if (ModelState.IsValid)
+            // TODO use fluent validation
+            IdentityResult result = await _mediator.Send(vm);
+            if (result.Succeeded)
             {
-                ApplicationUser user = new ApplicationUser { UserName = vm.Username, Email = vm.Email };
-                IdentityResult result = await _userManager.CreateAsync(user, vm.Password);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation($"Created new account for {user.UserName} with id {user.Id}");
-                    // check if role string is valid
-                    bool isValidRole = SecurityConstants.GetRoles().Contains(vm.UserRole);
-                    if (isValidRole)
-                    {
-                        await _userManager.AddToRoleAsync(user, vm.UserRole);
-                        _logger.LogInformation($"{vm.UserRole} role assigned to new user {user.UserName} with id {user.Id}");
-                    }
-
-                    return RedirectToAction(nameof(Index)).WithSuccess($"Created new user {user.UserName} {(isValidRole ? $"with role {vm.UserRole}" : "")}");
-                }
-                AddErrors(result);
+                _logger.LogInformation($"Created new account for {vm.Username}");
+                return RedirectToAction(nameof(Index)).WithSuccess($"Created new user {vm.Username}");
             }
-
+            AddErrors(result);
             // If we got this far, something failed, redisplay form
             ViewData["UserRole"] = new SelectList(SecurityConstants.GetRoles());
             return View(vm);
