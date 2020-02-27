@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -11,6 +12,7 @@ using UsersMgmt.App.Security;
 using UsersMgmt.App.Security.Commands.CreateAppUser;
 using UsersMgmt.App.Security.Commands.DeleteAppUser;
 using UsersMgmt.App.Security.Commands.EditAppUser;
+using UsersMgmt.App.Security.Commands.SendConfirmEmailToAppUser;
 using UsersMgmt.App.Security.Queries.GetAppUserById;
 using UsersMgmt.App.Security.Queries.GetAppUsers;
 using UsersMgmt.Web.Extensions;
@@ -48,7 +50,7 @@ namespace UsersMgmt.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateAppUserCommand vm)
         {
-            // TODO use fluent validation
+            vm.BaseUrl = new Uri(new Uri(Request.Scheme + "://" + Request.Host.Value), "Identity/Account/ConfirmEmail").ToString();
             IdentityResult result = await _mediator.Send(vm);
             if (result.Succeeded)
             {
@@ -56,6 +58,7 @@ namespace UsersMgmt.Web.Controllers
                 return RedirectToAction(nameof(Index)).WithSuccess($"Created new user {vm.Username}");
             }
             AddErrors(result);
+
             // If we got this far, something failed, redisplay form
             ViewData["UserRole"] = new SelectList(SecurityConstants.GetRoles());
             return View(vm);
@@ -64,7 +67,6 @@ namespace UsersMgmt.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
-            // TODO use fluent validation
             UserDTO uDTO = await _mediator.Send(new GetAppUserByIdQuery() { Id = id });
             if (uDTO == null)
             {
