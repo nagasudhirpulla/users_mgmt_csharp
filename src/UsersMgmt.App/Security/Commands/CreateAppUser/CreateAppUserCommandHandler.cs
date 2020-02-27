@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using UsersMgmt.Domain.Entities;
@@ -31,7 +32,7 @@ namespace UsersMgmt.App.Security.Commands.CreateAppUser
                 {
                     await _userManager.AddToRoleAsync(user, request.UserRole);
                     Console.WriteLine($"{request.UserRole} role assigned to new user {user.UserName} with id {user.Id}");
-                }
+                }                
             }
             return result;
         }

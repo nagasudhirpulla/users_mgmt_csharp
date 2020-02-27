@@ -19,7 +19,7 @@ namespace UsersMgmt.Infra
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
-            if (environment.IsEnvironment("Testing"))
+            if (environment.IsEnvironment("Testing") || environment.IsDevelopment())
             {
                 // Add Identity Infra
                 services.AddDbContext<AppIdentityDbContext>(options =>
