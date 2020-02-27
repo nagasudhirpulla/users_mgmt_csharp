@@ -31,7 +31,7 @@ namespace UsersMgmt.App.Security.Queries.GetAppUsers
             public async Task<UserListVM> Handle(GetAppUsersListQuery request, CancellationToken cancellationToken)
             {
                 UserListVM vm = new UserListVM();
-                vm.Users = new List<UserListItemDTO>();
+                vm.Users = new List<UserDTO>();
                 // get the list of users
                 List<ApplicationUser> users = await _userManager.Users.ToListAsync();
                 foreach (ApplicationUser user in users)
@@ -49,7 +49,7 @@ namespace UsersMgmt.App.Security.Queries.GetAppUsers
                         {
                             userRole = existingRoles.ElementAt(0);
                         }
-                        UserListItemDTO uDTO = _mapper.Map<UserListItemDTO>(user);
+                        UserDTO uDTO = _mapper.Map<UserDTO>(user);
                         uDTO.UserRole = userRole;
                         vm.Users.Add(uDTO);
                     }

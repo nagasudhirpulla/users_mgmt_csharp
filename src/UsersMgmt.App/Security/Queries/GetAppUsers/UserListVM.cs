@@ -4,7 +4,7 @@ namespace UsersMgmt.App.Security.Queries.GetAppUsers
 {
     public class UserListVM
     {
-        public IList<UserListItemDTO> Users { get; set; }
+        public IList<UserDTO> Users { get; set; }
     }
 
 }
