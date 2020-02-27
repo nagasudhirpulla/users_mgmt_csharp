@@ -12,6 +12,7 @@ using UsersMgmt.App.Security;
 using UsersMgmt.Domain.Entities;
 using UsersMgmt.Infra.Email;
 using UsersMgmt.Infra.Identity;
+using UsersMgmt.Infra.Identity.TokenProviders;
 
 namespace UsersMgmt.Infra
 {
@@ -42,9 +43,15 @@ namespace UsersMgmt.Infra
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 4;
                 options.Password.RequiredUniqueChars = 2;
+                options.Tokens.EmailConfirmationTokenProvider = "emailconfirmation";
             })
                 .AddEntityFrameworkStores<AppIdentityDbContext>()
-                .AddDefaultTokenProviders();
+                .AddDefaultTokenProviders()
+                .AddTokenProvider<EmailConfirmationTokenProvider<ApplicationUser>>("emailconfirmation");
+
+            // set email confirmation token lifespan to 3 days
+            services.Configure<EmailConfirmationTokenProviderOptions>(opt =>
+                opt.TokenLifespan = TimeSpan.FromDays(3));
 
             services.ConfigureApplicationCookie(options =>
             {
