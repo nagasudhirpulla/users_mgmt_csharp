@@ -31,6 +31,11 @@ namespace UsersMgmt.App.Security.Queries.GetAppUserById
 
             public async Task<UserDTO> Handle(GetAppUserByIdQuery request, CancellationToken cancellationToken)
             {
+                if (request.Id == null)
+                {
+                    return null;
+                }
+
                 ApplicationUser user = await _userManager.FindByIdAsync(request.Id);
                 if (user == null)
                 {

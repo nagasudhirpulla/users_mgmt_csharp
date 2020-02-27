@@ -12,6 +12,8 @@ using UsersMgmt.Infra;
 using UsersMgmt.App.Security;
 using UsersMgmt.Domain.Entities;
 using UsersMgmt.App;
+using FluentValidation.AspNetCore;
+using UsersMgmt.App.Security.Interfaces;
 
 namespace UsersMgmt.Web
 {
@@ -33,7 +35,9 @@ namespace UsersMgmt.Web
             services.AddApplication();
             services
                 .AddControllersWithViews()
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<IAppIdentityDbContext>())
                 .AddRazorRuntimeCompilation();
+
             services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizeFolder("/AuthFoldername");

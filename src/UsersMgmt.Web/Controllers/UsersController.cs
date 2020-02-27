@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -8,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using UsersMgmt.App.Security;
 using UsersMgmt.App.Security.Commands.CreateAppUser;
@@ -16,9 +13,7 @@ using UsersMgmt.App.Security.Commands.DeleteAppUser;
 using UsersMgmt.App.Security.Commands.EditAppUser;
 using UsersMgmt.App.Security.Queries.GetAppUserById;
 using UsersMgmt.App.Security.Queries.GetAppUsers;
-using UsersMgmt.Domain.Entities;
 using UsersMgmt.Web.Extensions;
-using UsersMgmt.Web.Models;
 
 namespace UsersMgmt.Web.Controllers
 {
@@ -69,12 +64,13 @@ namespace UsersMgmt.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            // TODO use fluent validation
+            UserDTO uDTO = await _mediator.Send(new GetAppUserByIdQuery() { Id = id });
+            if (uDTO == null)
             {
                 return NotFound();
             }
-            // TODO use fluent validation
-            UserDTO uDTO = await _mediator.Send(new GetAppUserByIdQuery() { Id = id });
+
             EditAppUserCommand vm = _mapper.Map<EditAppUserCommand>(uDTO);
 
             ViewData["UserRole"] = new SelectList(SecurityConstants.GetRoles());

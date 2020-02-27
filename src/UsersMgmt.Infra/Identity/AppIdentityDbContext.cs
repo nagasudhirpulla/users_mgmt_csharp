@@ -8,11 +8,12 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UsersMgmt.App.Security.Interfaces;
 using UsersMgmt.Domain.Entities;
 
 namespace UsersMgmt.Infra.Identity
 {
-    public class AppIdentityDbContext : IdentityDbContext<ApplicationUser>
+    public class AppIdentityDbContext : IdentityDbContext<ApplicationUser>, IAppIdentityDbContext
     {
         public AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> options)
             : base(options)
